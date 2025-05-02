@@ -1,15 +1,24 @@
 import bilby
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+import os
+import time
+import re
+import shutil
 
 plt.close('all')
 
 label = "gaussian_with_dm"
-outdir = "/fred/oz005/users/vdimarco/Portraiture"
+outdir = "/fred/oz005/users/vdimarco/Portraiture/outdir"
+plotdir = "/fred/oz005/users/vdimarco/Portraiture/plots"
+# Create directories if they don't exist
+os.makedirs(outdir, exist_ok=True)
+os.makedirs(plotdir, exist_ok=True)
 
-freqs = [600, 1400, 3200]  # Radio frequencies in MHz
+freqs = [600, 1400, 2100, 3200]  # Radio frequencies in MHz
 n_points = 100
-n_pulses = 3
+n_pulses = 4
 base_dm = 10.0  # typical for a Galactic pulsar between 
 variation_std = 0.0001  # small DM variations
 
@@ -135,41 +144,91 @@ def model_signal(*params, shifted_datasets):
 
     return np.array(modeled_signals)  # shape: (n_signals, n_freqs, n_points)
 
-# Plot model and signal
+# Funtion to plot model and signal
 def plot_it(modeled_signals,datasets):
+    x = np.linspace(0, 1, datasets.shape[2])
+    n_pulses = datasets.shape[0]
+    n_freqs = datasets.shape[1]
+    offset_step = 1
+    y_ticks = [i * offset_step for i in range(n_freqs)]
+    y_labels = [f"{freq} MHz" for freq in freqs]
     plt.figure(figsize=(12, 8))
-    for k in range(datasets.shape[1]):
-        for band in range(datasets.shape[1]):
-            plt.subplot(len(freqs), len(shifts), k + band*3 + 1)
-            plt.plot(x, datasets[k, band], label=f"Data")
-            plt.plot(x, modeled_signals[k, band], label=f"Model", linestyle='--')
-            plt.legend()
-            plt.title(f"Band {freqs[band]} MHz, Pulse {k+1}")
-    plt.tight_layout()
-    plt.savefig(f"{outdir}/plots/model_fit.png")
+    fig, axes = plt.subplots(n_pulses, 1, figsize=(12, 4 * n_pulses), sharex=True)
+    for k in range(n_pulses):
+        ax = axes[k] if n_pulses > 1 else axes  # handle 1 subplot edge case
+        for band in range(n_freqs):
+            offset = band * offset_step
+            y_data_raw = datasets[k, band]  + offset
+            y_model = modeled_signals[k, band]  + offset
+            # Plot raw data in grey
+            ax.plot(x, y_data_raw, color='grey', label=f"Data {freqs[band]} MHz" if k == 0 else "")
+            # Plot model in dark blue
+            ax.plot(x, y_model, color='darkblue', linestyle='--', label=f"Model {freqs[band]} MHz" if k == 0 else "")
+            ax.set_ylabel(f"{freqs[band]} MHz")
+        ax.set_title(f"Portrait {k+1}")
+        ax.set_yticks(y_ticks)
+        ax.set_yticklabels(y_labels)
+        ax.set_title(f"Portrait {k + 1}")
+        ax.set_ylabel("Frequency")
+    # Common x-axis label at bottom
+    axes[-1].set_xlabel("Phase")
+    # Shared legend (optional)
+    handles, labels = axes[0].get_legend_handles_labels()
+    custom_lines = [
+        Line2D([0], [0], color='grey', label='Data'),
+        Line2D([0], [0], color='darkblue', linestyle='--', label='Template')
+    ]
+    fig.legend(handles=custom_lines, loc='upper right')
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    fig.suptitle("Portraits", fontsize=16)
+    plt.savefig(f"{plotdir}/model_fit.png")
 
 # Generate the datasets (this is not shifted)
-dms = np.random.normal(loc=base_dm, scale=variation_std, size=n_pulses).tolist()
-print("DM values:", [f"{dm:.2f}" for dm in dms])
+dms = np.random.normal(loc=base_dm, scale=variation_std, size=len(freqs)).tolist()
+print("DM values:", [f"{dm:.6f}" for dm in dms])
 shifts = np.random.uniform(low=-0.01, high=0.01, size=n_pulses).tolist()
-print("Shift values:", [f"{s:.2f}" for s in shifts])
+print("Shift values:", [f"{s:.6f}" for s in shifts])
 
 n_signals = len(shifts)
 datasets, shifted_datasets = generate_signals(shifts, dms, freqs, n_points)
 
-
+## Plot dataset
 x = np.linspace(0, 1, datasets.shape[2])
-
+n_pulses = datasets.shape[0]
+n_freqs = datasets.shape[1]
+offset_step = 1
+y_ticks = [i * offset_step for i in range(n_freqs)]
+y_labels = [f"{freq} MHz" for freq in freqs]
 plt.figure(figsize=(12, 8))
-for k in range(datasets.shape[1]):
-    for band in range(len(freqs)):
-        plt.subplot(len(freqs), len(shifts), k + band*3 + 1)
-        plt.plot(x, datasets[k, band], label=f"unshifted data")
-        plt.plot(x, shifted_datasets[k, band], label=f"shifted data",  linestyle='--')
-        plt.legend()
-        plt.title(f"Band {freqs[band]} MHz, Pulse {k+1}")
-plt.tight_layout()
-plt.savefig(f"{outdir}/plots/unshifted_shifted.png")
+fig, axes = plt.subplots(n_pulses, 1, figsize=(12, 4 * n_pulses), sharex=True)
+for k in range(n_pulses):
+    ax = axes[k] if n_pulses > 1 else axes  # handle 1 subplot edge case
+    for band in range(n_freqs):
+        offset = band * offset_step
+        y_data = datasets[k, band]  + offset
+        y_data_shifted = shifted_datasets[k, band]  + offset
+        # Plot raw data in grey
+        ax.plot(x, y_data, color='grey', label=f"Data {freqs[band]} MHz" if k == 0 else "")
+        # Plot model in dark blue
+        ax.plot(x, y_data_shifted, color='darkblue', linestyle='--', label=f"Model {freqs[band]} MHz" if k == 0 else "")
+        ax.set_ylabel(f"{freqs[band]} MHz")
+    ax.set_title(f"Portrait {k+1}")
+    ax.set_yticks(y_ticks)
+    ax.set_yticklabels(y_labels)
+    ax.set_title(f"Portrait {k + 1}")
+    ax.set_ylabel("Frequency")
+# Common x-axis label at bottom
+axes[-1].set_xlabel("Phase")
+# Shared legend (optional)
+handles, labels = axes[0].get_legend_handles_labels()
+custom_lines = [
+    Line2D([0], [0], color='grey', label='Unshifted Data'),
+    Line2D([0], [0], color='darkblue', linestyle='--', label='Shifted Model')
+]
+fig.legend(handles=custom_lines, loc='upper right')
+fig.tight_layout(rect=[0, 0, 1, 0.96])
+fig.suptitle("Portraits", fontsize=16)
+plt.savefig(f"{plotdir}/data_shifted.png")
 
 # Define the likelihood class
 class SimpleGaussianLikelihood(bilby.Likelihood):
@@ -219,12 +278,14 @@ for i in range(n_signals):
     priors[f"dm{i}"] = bilby.core.prior.Uniform(9.5, 10.5, f"dm{i}")
     priors[f"d{i}"] = bilby.core.prior.Uniform(-0.3, 0.3, f"d{i}")
 
-import shutil
+# Start timer
+start_time = time.time()
+
+sample = True
 shutil.rmtree("outdir", ignore_errors=True)
 # shuthill resets output directory so results aren’t mixed with old runs
 # as sometimes resume=False does not work.
 # It needs to be commented out if the intended is resume=True
-sample = True
 if sample:
     result = bilby.run_sampler(
         likelihood=likelihood,
@@ -238,7 +299,11 @@ if sample:
     )
     result.plot_corner(save=False)
 
-import re
+# End timer
+end_time = time.time()
+elapsed_time = end_time - start_time
+
+print(f"\n⏱️ Elapsed time: {elapsed_time:.2f} seconds")
 
 # Load results
 result = bilby.result.read_in_result(outdir=outdir, label=label)

@@ -1,0 +1,56 @@
+-------------------------------------------------------------------------------
+There are messages associated with the following module(s):
+-------------------------------------------------------------------------------
+
+mamba:
+   - Mamba is a drop-in replacement for conda, offering higher speed and
+   more reliable environment solutions. - Do you really need conda/mamba??
+   Do you know about python virtual environments??? We HIGHLY recommend
+   using virtual envs instead. e.g. python -m venv my-environment - Remember
+   you can change where conda environemnts are created (if you run out of
+   space in your home directory) ``` $ conda config --env --prepend
+   envs_dirs /path/to/my/project/on/fred/.conda/envs $ conda config --env
+   --prepend pkgs_dirs /path/to/my/project/on/fred/.conda/pkgs ``` - To hide
+   this message in the future, load the module with -q ``` $ module -q load
+   conda ```
+
+-------------------------------------------------------------------------------
+
+Lmod has detected the following error: Cannot load module "python/3.10.4"
+because these module(s) are loaded:
+   mamba
+
+While processing the following module(s):
+    Module fullname  Module Filename
+    ---------------  ---------------
+    python/3.10.4    /apps/modules/modulefiles/all/compiler/gcccore/11.3.0/python/3.10.4.lua
+    psrhome/latest   /apps/users/pulsar/milan/gcc-11.3.0/modulefiles/psrhome/latest.lua
+
+Lmod has detected the following error: Cannot load module "python/3.10.4"
+because these module(s) are loaded:
+   mamba
+
+While processing the following module(s):
+    Module fullname  Module Filename
+    ---------------  ---------------
+    python/3.10.4    /apps/modules/modulefiles/all/compiler/gcccore/11.3.0/python/3.10.4.lua
+    psrhome/latest   /apps/users/pulsar/milan/gcc-11.3.0/modulefiles/psrhome/latest.lua
+
+13:36 bilby INFO    : Running for label 'gaussian_with_dm', output will be saved to '/fred/oz005/users/vdimarco/Portraiture/outdir'
+13:36 bilby INFO    : Analysis priors:
+13:36 bilby INFO    : dm0=Uniform(minimum=9.5, maximum=10.5, name='dm0', latex_label='dm0', unit=None, boundary=None)
+13:36 bilby INFO    : d0=Uniform(minimum=-0.3, maximum=0.3, name='d0', latex_label='d0', unit=None, boundary=None)
+13:36 bilby INFO    : dm1=Uniform(minimum=9.5, maximum=10.5, name='dm1', latex_label='dm1', unit=None, boundary=None)
+13:36 bilby INFO    : d1=Uniform(minimum=-0.3, maximum=0.3, name='d1', latex_label='d1', unit=None, boundary=None)
+13:36 bilby INFO    : dm2=Uniform(minimum=9.5, maximum=10.5, name='dm2', latex_label='dm2', unit=None, boundary=None)
+13:36 bilby INFO    : d2=Uniform(minimum=-0.3, maximum=0.3, name='d2', latex_label='d2', unit=None, boundary=None)
+13:36 bilby INFO    : dm3=Uniform(minimum=9.5, maximum=10.5, name='dm3', latex_label='dm3', unit=None, boundary=None)
+13:36 bilby INFO    : d3=Uniform(minimum=-0.3, maximum=0.3, name='d3', latex_label='d3', unit=None, boundary=None)
+13:36 bilby INFO    : Analysis likelihood class: <class '__main__.SimpleGaussianLikelihood'>
+13:36 bilby INFO    : Analysis likelihood noise evidence: nan
+13:36 bilby INFO    : Single likelihood evaluation took 1.197e-03 s
+13:36 bilby INFO    : Using sampler Dynesty with kwargs {'nlive': 250, 'bound': 'live', 'sample': 'act-walk', 'periodic': None, 'reflective': None, 'update_interval': 600, 'first_update': None, 'npdim': None, 'rstate': None, 'queue_size': 1, 'pool': None, 'use_pool': None, 'live_points': None, 'logl_args': None, 'logl_kwargs': None, 'ptform_args': None, 'ptform_kwargs': None, 'gradient': None, 'grad_args': None, 'grad_kwargs': None, 'compute_jac': False, 'enlarge': None, 'bootstrap': None, 'walks': 100, 'facc': 0.2, 'slices': None, 'fmove': 0.9, 'max_move': 100, 'update_func': None, 'ncdim': None, 'blob': False, 'save_history': False, 'history_filename': None, 'maxiter': None, 'maxcall': None, 'dlogz': 0.1, 'logl_max': inf, 'n_effective': None, 'add_live': True, 'print_progress': True, 'print_func': <bound method Dynesty._print_func of <bilby.core.sampler.dynesty.Dynesty object at 0x1541d58156d0>>, 'save_bounds': False, 'checkpoint_file': None, 'checkpoint_every': 60, 'resume': False}
+13:36 bilby INFO    : Checkpoint every check_point_delta_t = 600s
+13:36 bilby INFO    : Using dynesty version 2.1.2
+13:36 bilby INFO    : Using the bilby-implemented rwalk sampling tracking the autocorrelation function and thinning by 2 with maximum length 10000
+13:36 bilby INFO    : Generating initial points from the prior
