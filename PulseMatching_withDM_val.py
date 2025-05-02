@@ -303,7 +303,12 @@ if sample:
 end_time = time.time()
 elapsed_time = end_time - start_time
 
-print(f"\n⏱️ Elapsed time: {elapsed_time:.2f} seconds")
+# Convert to h:m:s
+hours = int(elapsed_time // 3600)
+minutes = int((elapsed_time % 3600) // 60)
+seconds = elapsed_time % 60
+
+print(f"\n⏱️ Elapsed time: {elapsed_time:.2f} seconds ({hours}h {minutes}m {seconds:.2f}s)")
 
 # Load results
 result = bilby.result.read_in_result(outdir=outdir, label=label)
