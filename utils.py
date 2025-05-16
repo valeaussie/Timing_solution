@@ -13,12 +13,12 @@ plotdir = "/fred/oz005/users/vdimarco/Portraiture/plots"
 os.makedirs(outdir, exist_ok=True)
 os.makedirs(plotdir, exist_ok=True)
 
-n = 32  # number of bins
-#freqs = np.linspace(600, 3200, n).astype(int).tolist() # Radio frequencies in MHz
-freqs = [600, 1000, 1400, 1800, 2200, 2600, 3000, 3200] # Radio frequencies in MHz
+n = 10  # number of frequency bins
+freqs = np.linspace(600, 1000, n).astype(int).tolist() # Radio frequencies in MHz
+#freqs = [600, 1000, 1400, 1800, 2200, 2600, 3000, 3200] # Radio frequencies in MHz
 print(freqs)
 n_points = 100
-n_pulses = 3
+n_pulses = 5
 base_dm = 10.0  # typical for a Galactic pulsar between 
 variation_std = 0.0001  # small DM variations
 
@@ -142,26 +142,35 @@ def model_signal(*params, shifted_datasets):
     shifts = params[n_signals:]
 
     modeled_signals = []
-
+    total_aligned_signals = []
     for i in range(n_signals):  # model each signal i
         # Indices of other signals (to build template)
+        conditioning_indices = list(range(i+1, n_signals))
+        print("conditioning_indices: ", conditioning_indices)
         other_indices = [j for j in range(n_signals) if j != i]
+        #print("index i: ", i)
+        #print("other_indices: ", other_indices)
 
         # Build template across bands
+        
         templates = []
+        all_aligned_signals = []
         for f in range(n_freqs):
             # Undo DM + time shifts for all other signals
             aligned_signals = []
             for j in other_indices:
+            #for j in conditioning_indices:
                 undispersed = invert_dm_delay(
                     shifted_datasets[j, f], dms[j], freqs[f], n_points)
                 aligned = translate_signal(undispersed, -shifts[j])
                 aligned_signals.append(aligned)
-
+            
             # Average template across other signals
             template = np.mean(aligned_signals, axis=0)
             templates.append(template)
-
+            all_aligned_signals.append(template)
+        print("templates: ", np.shape(templates))
+        total_aligned_signals.append(templates)
         # Reapply DM and shift to simulate signal i
         band_signals = []
         for f, freq in enumerate(freqs):
@@ -170,8 +179,9 @@ def model_signal(*params, shifted_datasets):
             band_signals.append(shifted)
 
         modeled_signals.append(band_signals)
+    print("total_aligned_signals: ", np.shape(total_aligned_signals))
 
-    return np.array(modeled_signals)  # shape: (n_signals, n_freqs, n_points)
+    return np.array(total_aligned_signals), np.array(modeled_signals)  # shape: (n_signals, n_freqs, n_points)
 
 # # Funtion to plot model and signal
 # def plot_it(modeled_signals,datasets):

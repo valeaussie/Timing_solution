@@ -20,8 +20,6 @@ print("Shift values:", [f"{s:.6f}" for s in shifts])
 
 n_signals = len(shifts)
 datasets, shifted_datasets = generate_signals(shifts, dms, freqs, n_points)
-np.save(f"{outdir}/datasets.npy", datasets)
-np.save(f"{outdir}/shifted_datasets.npy", shifted_datasets)
 
 # ## Plot dataset
 # x = np.linspace(0, 1, datasets.shape[2])
@@ -100,8 +98,8 @@ class SimpleGaussianLikelihood(bilby.Likelihood):
         return ll
 
 likelihood = SimpleGaussianLikelihood(data=shifted_datasets, 
-                                      model=lambda *args: model_signal(*args, shifted_datasets=shifted_datasets), 
-                                      n_signals=len(shifts), sigma=0.01)
+                                     model=lambda *args: model_signal(*args, shifted_datasets=shifted_datasets)[1], 
+                                     n_signals=len(shifts), sigma=0.01)
     
 # Set up and run the sampler
 priors = {}
@@ -113,7 +111,7 @@ for i in range(n_signals):
 start_time = time.time()
 
 sample = True
-# shutil.rmtree("outdir", ignore_errors=True)
+shutil.rmtree("outdir", ignore_errors=True)
 # shuthill resets output directory so results aren’t mixed with old runs
 # as sometimes resume=False does not work.
 # It needs to be commented out if the intended is resume=True
@@ -161,3 +159,6 @@ print("the numbers of parameters is: ", len(params))
 # Print dm_medians and d_medians
 print("Best-fit DMs (median):", ", ".join(f"{dm:.5f}" for dm in dm_medians))
 print("Best-fit Shifts (median):", ", ".join(f"{d:.5f}" for d in d_medians))
+
+np.save(f"{outdir}/datasets.npy", datasets)
+np.save(f"{outdir}/shifted_datasets.npy", shifted_datasets)
